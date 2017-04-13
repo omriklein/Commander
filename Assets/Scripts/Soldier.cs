@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum team
+{
+    team1,
+    team2,
+    noTeam
+}
 
 [RequireComponent(typeof(Rigidbody))]
 public class Soldier : MonoBehaviour
@@ -11,11 +17,13 @@ public class Soldier : MonoBehaviour
     public bool isAttack; // if this soldier is attacking
     public float speed = 0.1f; // the walking speed
 
+    public team myTeam;
+
     public Vector3 testPoint;
-    public GameObject targetObject;
+    private GameObject targetObject; // protected???
 
     // Use this for initialization
-    void Start()
+    protected virtual void Start()
     {
         health = MAX_HP;
         isAttack = false; // turn to private
@@ -23,12 +31,26 @@ public class Soldier : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
         if (targetObject != null)
             walkTo(targetObject.transform.position);
     }
 
+    /// <summary>
+    /// go to a target object
+    /// </summary>
+    /// <param name="targetObject">target GameObject</param>
+    public void goTo(GameObject targetObject)
+    {
+        print("going....");
+        this.targetObject = targetObject;
+    }
+
+    /// <summary>
+    /// walks 1 speed towards a target
+    /// </summary>
+    /// <param name="target">vecter3</param>
     public void walkTo(Vector3 target)
     {
         if (this.transform.position != target)
@@ -62,7 +84,8 @@ public class Soldier : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Soldier")
         {
-            this.transform.Translate(Vector3.right * speed);
+            // give a new algorithem for soldiers how gets stuck
+            this.transform.Translate(Vector3.right * speed * 10);
         }
     }
 }

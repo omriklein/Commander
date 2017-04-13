@@ -1,27 +1,44 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 enum things
 {
     solider,
     tank,
     airplain,
+    all,
     nothing
 }
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject[] soldiers;
+    public List<GameObject> soldiers; //???
+    public List<GameObject> tanks; //???
 
-    public GameObject target = null;
+    private Stack<string> previosLines = new Stack<string>();
+
+    public GameObject soldierPrefub;
+    public GameObject tankPrefub;
+
     private InputField input; // the input field
+    private string target;
 
     // Use this for initialization
     void Start()
     {
-        soldiers = GameObject.FindGameObjectsWithTag("Soldier");
+        //soldiers = GameObject.FindGameObjectsWithTag("Soldier");
+        //tanks = GameObject.FindGameObjectsWithTag("Tank");
         input = GameObject.Find("InputField").GetComponent<InputField>();
+
+        for (int i = 0; i < 3; i++)
+        {
+            soldiers.Add(GameObject.Instantiate(soldierPrefub, new Vector3(-10f + i * 3f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
+            soldiers[i].name = "Soldier" + i;
+            tanks.Add(GameObject.Instantiate(tankPrefub, new Vector3(3f + i * 3f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
+            tanks[i].name = "Tank" + i;
+        }
     }
 
     // Update is called once per frame
@@ -29,18 +46,13 @@ public class GameManager : MonoBehaviour
     {
         input.Select(); // set the cursor to the input field
 
-        // get all the soldiers in the game
-        foreach (GameObject s in soldiers)
-        {
-            //s.GetComponent<Soldier>().walkTo(target.transform.position);
-        }
-
         // on submit input field
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            //print(input.text); // print the text
+            addLineToStack(input.text);
             interpator(input.text);
-            // S9becon = 9 soldiers to becon
+            //S1,S2,S3 becon => soldiers 1 2 and 3 goto becon
+            //split(' ') => split(',')
             input.text = ""; // zeroize the input field text
             input.ActivateInputField(); // activate the input field
         }
@@ -48,37 +60,115 @@ public class GameManager : MonoBehaviour
 
     private void interpator(string text)
     {
-        things thing;
-        int number = 0;
-
         if (text.Length == 0)
         { print("Error..."); return; }
 
-        switch (text[0])
+        string[] arr = text.Split(' '); // splits the soldiers,tank ect from place
+        string[] moving = arr[0].Split(',');
+
+        if (arr.Length != 2)
+        { print("you need 2 words and a space"); }
+
+        target = arr[arr.Length - 1];
+        things thing;
+
+        foreach (string str in moving) // each element separated by ','
         {
-            case 'S': thing = things.solider; break;
-            case 'T': thing = things.tank; break;
-            case 'A': thing = things.airplain; break;
-            default: thing = things.nothing; break;
+            if (str == "All")
+            {
+                for (int j = 0; j < soldiers.Count; j++)
+                {
+                    move(things.solider, j, target);
+                }
+                for (int j = 0; j < tanks.Count; j++)
+                {
+                    move(things.tank, j, target);
+                }
+                break;
+            }
+            else
+            {
+                switch (str[0])
+                {
+                    case 'S': thing = things.solider; break;
+                    case 'T': thing = things.tank; break;
+                    case 'A': thing = things.airplain; break;
+                    default: thing = things.nothing; break;
+                }
+                if (str.Substring(1).Contains("-"))
+                {
+                    if (str.Substring(1).Split('-').Length == 2)
+                    {
+                        for (int i = int.Parse(str.Substring(1).Split('-')[0]); i < int.Parse(str.Substring(1).Split('-')[1]); i++)
+                        {
+                            move(thing, i, target); // what? whice number? to where?
+                        }
+                    }
+                    else
+                    {
+                        print("can't do " + str);
+                        break;
+                    }
+
+                    print("in progress...");
+                }
+                else
+                {
+                    move(thing, int.Parse(str.Substring(1)), target); // what? whice number? to where?
+                }
+            }
         }
 
-        text = text.Substring(1);
-        while (text.Length > 0 && text[0] >= '0' && text[0] <= '9')
-        {
-            number = number * 10 + ((int)text[0] - 48); // '0' is 48 in unicode
-            text = text.Substring(1);
-        }
+        //int number = 0;
 
-        // sund "number" of "thing" to "place" ~ "text"
-        print(thing + ", " + number + ", " + text);
+        //text = text.Substring(1);
+        //while (text.Length > 0 && text[0] >= '0' && text[0] <= '9')
+        //{
+        //    number = number * 10 + ((int)text[0] - 48); // '0' is 48 in unicode
+        //    text = text.Substring(1);
+        //}
 
+        //// send "number" of "thing" to "place" ~ "text"
+        //print(thing + ", " + number + ", " + text);
+
+    }
+
+    /// <summary>
+    /// moves "something" at "number" to "place"
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="number"></param>
+    private void move(things thing, int number, string place)
+    {
         try
         {
-            for (int i = 0; i < number; i++)
+            switch (thing)
             {
-                soldiers[i].GetComponent<Soldier>().targetObject = GameObject.Find(text);
+                case things.solider:
+                    soldiers[number].GetComponent<Soldier>().goTo(GameObject.Find(place));
+                    break;
+                case things.tank:
+                    print(tanks[number].name);
+                    tanks[number].GetComponent<Soldier>().goTo(GameObject.Find(place));
+                    break;
+                case things.airplain:
+                    soldiers[number].GetComponent<Soldier>().goTo(GameObject.Find(place));
+                    break;
             }
         }
         catch { print("Error is found... cannot walk"); }
+    }
+
+    /// <summary>
+    /// add a line to previosLines stack
+    /// </summary>
+    /// <param name="line">String</param>
+    private void addLineToStack(string line)
+    {
+        if (line != null)
+        {
+            this.previosLines.Push(line);
+        }
+        // remove lines after 30 or 50 lines so save place
     }
 }
