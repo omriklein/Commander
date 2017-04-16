@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public enum team
 {
@@ -10,16 +11,17 @@ public enum team
 
 [RequireComponent(typeof(Rigidbody))]
 public class Soldier : MonoBehaviour
-{ 
+{
     //turn to 'private'
     public const float MAX_HP = 100; // the maximum HP
     public float health; // the current HP
     public bool isAttack; // if this soldier is attacking
     public float speed = 0.1f; // the walking speed
 
+    public float distance = 50f;
+
     public team myTeam;
 
-    public Vector3 testPoint;
     private GameObject targetObject; // protected???
 
     // Use this for initialization
@@ -53,13 +55,14 @@ public class Soldier : MonoBehaviour
     /// <param name="target">vecter3</param>
     public void walkTo(Vector3 target)
     {
-        if (this.transform.position != target)
+        if (/*this.transform.position != target*/Vector3.Distance(this.transform.position, target) >= distance)
         {
             this.transform.LookAt(target);
             this.transform.Translate(Vector3.forward * Mathf.Clamp(Vector3.Distance(this.transform.position, target), 0, speed));
         }
         else
         {
+            this.transform.LookAt(target);
             this.targetObject = null;
         }
     }
@@ -68,7 +71,7 @@ public class Soldier : MonoBehaviour
     {
         if (this.transform.position != target)
         {
-            this.transform.LookAt(testPoint);
+            this.transform.LookAt(target);
             if (Vector3.Distance(this.transform.position, target) >= speed)
                 this.transform.Translate(Vector3.forward * speed);
             else
@@ -76,7 +79,7 @@ public class Soldier : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if(targetObject != null && collision.gameObject.name==targetObject.name)
         {
@@ -87,5 +90,5 @@ public class Soldier : MonoBehaviour
             // give a new algorithem for soldiers how gets stuck
             this.transform.Translate(Vector3.right * speed * 10);
         }
-    }
+    }*/
 }

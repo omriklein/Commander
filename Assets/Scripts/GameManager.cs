@@ -36,14 +36,20 @@ public class GameManager : MonoBehaviour
         {
             soldiers.Add(GameObject.Instantiate(soldierPrefub, new Vector3(-10f + i * 3f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
             soldiers[i].name = "Soldier" + i;
-            tanks.Add(GameObject.Instantiate(tankPrefub, new Vector3(3f + i * 3f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
+            soldiers[i].GetComponentInChildren<TextMesh>().text = "Soldier " + i;
+            tanks.Add(GameObject.Instantiate(tankPrefub, new Vector3(3f + i * 5f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
             tanks[i].name = "Tank" + i;
+            tanks[i].GetComponentInChildren<TextMesh>().text = "Tank " + i;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        { input.DeactivateInputField(); }
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        { input.ActivateInputField(); }
         input.Select(); // set the cursor to the input field
 
         // on submit input field
@@ -55,6 +61,13 @@ public class GameManager : MonoBehaviour
             //split(' ') => split(',')
             input.text = ""; // zeroize the input field text
             input.ActivateInputField(); // activate the input field
+        }
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (previosLines.Count != 0)
+                input.text = previosLines.Pop();
+            else
+                print("there are no previos lines");
         }
     }
 
@@ -99,7 +112,7 @@ public class GameManager : MonoBehaviour
                 {
                     if (str.Substring(1).Split('-').Length == 2)
                     {
-                        for (int i = int.Parse(str.Substring(1).Split('-')[0]); i < int.Parse(str.Substring(1).Split('-')[1]); i++)
+                        for (int i = int.Parse(str.Substring(1).Split('-')[0]); i <= int.Parse(str.Substring(1).Split('-')[1]); i++)
                         {
                             move(thing, i, target); // what? whice number? to where?
                         }
@@ -118,19 +131,6 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-
-        //int number = 0;
-
-        //text = text.Substring(1);
-        //while (text.Length > 0 && text[0] >= '0' && text[0] <= '9')
-        //{
-        //    number = number * 10 + ((int)text[0] - 48); // '0' is 48 in unicode
-        //    text = text.Substring(1);
-        //}
-
-        //// send "number" of "thing" to "place" ~ "text"
-        //print(thing + ", " + number + ", " + text);
-
     }
 
     /// <summary>

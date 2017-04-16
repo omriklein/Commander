@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Camera : MonoBehaviour
+public class CameraScript : MonoBehaviour
 {
 
     public float speed = 5f;
@@ -22,9 +22,13 @@ public class Camera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        move();
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        { move(); }
     }
 
+    /// <summary>
+    /// move this object with arrows
+    /// </summary>
     private void move()
     {
         if (Input.GetKey("up") && this.transform.position.z <= borderUp)
