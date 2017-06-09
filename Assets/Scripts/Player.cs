@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// stuff on the battle field
+/// </summary>
 enum things
 {
     solider,
@@ -12,31 +15,38 @@ enum things
     nothing
 }
 
-public class GameManager : MonoBehaviour
+public class Player : MonoBehaviour
 {
-    public List<GameObject> soldiers; //???
-    public List<GameObject> tanks; //???
+    public string playerName;
+    public team myTeam;
+    public float money;
 
-    private Stack<string> previosLines = new Stack<string>();
+    private List<GameObject> soldiers = new List<GameObject>(); // all the soldiers
+    private List<GameObject> tanks = new List<GameObject>(); // all the tanks
 
-    public GameObject soldierPrefub;
-    public GameObject tankPrefub;
+    public GameObject soldierPrefub; // the soldier's prefub
+    public GameObject tankPrefub; // the tank's prefub
 
+    private string target; // the target of the soldier
     private InputField input; // the input field
-    private string target;
+
+    private Stack<string> previosLines = new Stack<string>(); // a stack all the commends that were writen before
 
     // Use this for initialization
     void Start()
     {
         //soldiers = GameObject.FindGameObjectsWithTag("Soldier");
         //tanks = GameObject.FindGameObjectsWithTag("Tank");
-        input = GameObject.Find("InputField").GetComponent<InputField>();
 
+        input = GameObject.Find("InputField").GetComponent<InputField>(); // get the input field
+
+        //create soldiers and tanks 
         for (int i = 0; i < 3; i++)
         {
             soldiers.Add(GameObject.Instantiate(soldierPrefub, new Vector3(-10f + i * 3f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
             soldiers[i].name = "Soldier" + i;
             soldiers[i].GetComponentInChildren<TextMesh>().text = "Soldier " + i;
+
             tanks.Add(GameObject.Instantiate(tankPrefub, new Vector3(3f + i * 5f, 0.5f, -9f), new Quaternion(0, 0, 0, 0)));
             tanks[i].name = "Tank" + i;
             tanks[i].GetComponentInChildren<TextMesh>().text = "Tank " + i;
@@ -46,22 +56,25 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // if Ctrl is pressed diactivate the input field for camera movement
         if (Input.GetKeyDown(KeyCode.LeftControl))
         { input.DeactivateInputField(); }
         if (Input.GetKeyUp(KeyCode.LeftControl))
         { input.ActivateInputField(); }
+
         input.Select(); // set the cursor to the input field
 
-        // on submit input field
+        // on submit input field (with Enter)
         if (Input.GetKeyDown(KeyCode.Return))
         {
             addLineToStack(input.text);
             interpator(input.text);
             //S1,S2,S3 becon => soldiers 1 2 and 3 goto becon
-            //split(' ') => split(',')
             input.text = ""; // zeroize the input field text
             input.ActivateInputField(); // activate the input field
         }
+
+        // on Tab bring up the previos lines
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (previosLines.Count != 0)
@@ -71,6 +84,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// interpatets the commend the user submited
+    /// </summary>
+    /// <param name="text">the commend</param>
     private void interpator(string text)
     {
         if (text.Length == 0)

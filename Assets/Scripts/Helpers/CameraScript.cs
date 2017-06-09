@@ -13,6 +13,9 @@ public class CameraScript : MonoBehaviour
     public float borderRight;
     public float borderLeft;
 
+    public float zoomOutLimit;
+    public float zoomInLimit;
+
     // Use this for initialization
     void Start()
     {
@@ -39,5 +42,13 @@ public class CameraScript : MonoBehaviour
             this.transform.Translate(Vector3.right * speed * Time.deltaTime);
         if (Input.GetKey("left") && this.transform.position.x >= borderLeft)
             this.transform.Translate(Vector3.left * speed * Time.deltaTime);
+
+        if ((Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)) && this.transform.position.y >= zoomInLimit)
+        {
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) && this.transform.position.y <= zoomOutLimit)
+                this.transform.Translate(Vector3.back * speed * Time.deltaTime);
+            else
+                this.transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        }
     }
 }
